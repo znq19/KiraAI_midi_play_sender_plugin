@@ -1,9 +1,10 @@
 {
   "plugin_id": "midi_play_sender",
   "display_name": "MIDI演奏语音条",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "author": "znq19",
   "description": "搜索MIDI谱并用合成器演奏发QQ语音条：LLM自然语言点歌、/弹奏命令词，异步渲染完成后自动发送并通知。",
   "repo": "https://github.com/znq19/KiraAI_midi_play_sender_plugin",
-  "core_version": ">=2.6.1"
+  "core_version": ">=2.6.1",
+  "icon": "icon.png"
 }

@@ -301,6 +301,12 @@ class MidiPlaySenderPlugin(BasePlugin):
             logger.info(f"[midi_play_sender] 本地谱已入谱库: {dst.name}")
             return dst
         # 关闭复制：直接用原文件（不占谱库，但下次可能找不到）
+        if usable != local:
+            # 修复路径：修复文件是派生产物，仍复制入谱库并清理临时文件，避免泄漏
+            shutil.copy2(usable, dst)
+            usable.unlink(missing_ok=True)
+            logger.info(f"[midi_play_sender] 修复后的谱子已入谱库: {dst.name}")
+            return dst
         return usable
 
     def _cleanup_cache(self) -> None:
@@ -466,8 +472,7 @@ class MidiPlaySenderPlugin(BasePlugin):
                             return f"谱子下载失败：{e}"
                         # url 失效（bitmidi 索引可能有过期条目）：回退按歌名重搜，逐个候选尝试
                         logger.warning(f"[midi_play_sender] url 失效({e})，回退搜索「{song}」")
-                        cands = await midi_src.pick_midi(song, self.search_count)
-                        ok, err = await midi_src.try_download_any(cands, mid)
+                        ok, err = await midi_src.search_and_download(song, mid, self.search_count)
                         if not ok:
                             return f"谱子下载失败：{err}"
                 else:
@@ -487,7 +492,7 @@ class MidiPlaySenderPlugin(BasePlugin):
                         if not cands:
                             return f"本地谱不存在，且在线也没找到「{song}」，试试英文名（如 Canon in D）"
                         if self.auto_pick_top:
-                            ok, err = await midi_src.try_download_any(cands, mid)
+                            ok, err = await midi_src.search_and_download(song, mid, self.search_count)
                             if not ok:
                                 return f"谱子下载失败：{err}"
                         else:
@@ -499,7 +504,7 @@ class MidiPlaySenderPlugin(BasePlugin):
                 if not cands:
                     return f"没找到「{song}」的MIDI谱，试试英文名（如 Canon in D）或加上歌手名"
                 if self.auto_pick_top:
-                    ok, err = await midi_src.try_download_any(cands, mid)
+                    ok, err = await midi_src.search_and_download(song, mid, self.search_count)
                     if not ok:
                         return f"谱子下载失败：{err}"
                 else:
@@ -533,7 +538,8 @@ class MidiPlaySenderPlugin(BasePlugin):
         lines = [f"找到「{song}」的MIDI谱："]
         for i, c in enumerate(cands, 1):
             host = "bitmidi" if "bitmidi.com" in c["url"] else (
-                "hamienet" if "hamienet.com" in c["url"] else "web")
+                "freemidi" if "freemidi.org" in c["url"] else (
+                    "hamienet" if "hamienet.com" in c["url"] else "web"))
             lines.append(f"{i}. {c.get('title', '')}｜{host}｜{c['url']}")
         lines.append("可直接传 url 再次调用直接演奏，或展示给用户选择。")
         return "\n".join(lines)
