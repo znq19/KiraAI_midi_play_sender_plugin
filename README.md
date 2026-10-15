@@ -1,4 +1,4 @@
-# 🎹 MIDI演奏语音条（midi_play_sender）v1.1.0
+# 🎹 MIDI演奏语音条（midi_play_sender）v1.1.1
 
 一个给 **KiraAI** 机器人用的插件：你说一首歌名，它**搜索 MIDI 谱 → 用合成器弹出来 → 直接发成 QQ 语音条**。
 
@@ -111,6 +111,10 @@ A：刻意做了优化：工具只做快的搜索下载，渲染放后台；完�
 
 <details>
 <summary>📝 更新日志（点击展开）</summary>
+
+**v1.1.1**
+
+- 兼容 KiraAI 3.0 GA 弃用面：4 处 `ctx.message_processor.send_message_chain` → `ctx.send_message_chain`（两代等价）。零行为变化。
 
 **v1.1.0**
 - 搜索渠道重构：移除已失效的 DuckDuckGo HTML 端点（202 反爬）与 bitmidi slug 直拼兜底（不带数字的 URL 全 404）

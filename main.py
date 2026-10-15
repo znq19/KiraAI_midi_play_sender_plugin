@@ -356,7 +356,7 @@ class MidiPlaySenderPlugin(BasePlugin):
         if not any(text == c or text.startswith(c + " ") for c in self.command_words):
             return
         if not self._is_allowed_event(event):
-            await self.ctx.message_processor.send_message_chain(
+            await self.ctx.send_message_chain(
                 event.session.sid, MessageChain([Text(self.permission_denied_message)]))
             event.discard(force=True)
             event.stop()
@@ -372,7 +372,7 @@ class MidiPlaySenderPlugin(BasePlugin):
         except Exception as e:
             logger.exception("[midi_play_sender] command failed")
             reply = f"弹奏失败：{e}"
-        await self.ctx.message_processor.send_message_chain(
+        await self.ctx.send_message_chain(
             event.session.sid, MessageChain([Text(reply)]))
         event.discard(force=True)
         event.stop()
@@ -553,7 +553,7 @@ class MidiPlaySenderPlugin(BasePlugin):
 
     async def _send_ogg(self, sid: str, ogg: Path, song: str, preset: str) -> str:
         chain = MessageChain([Record(record=str(ogg), name=Path(ogg).name)])
-        result = await self.ctx.message_processor.send_message_chain(sid, chain)
+        result = await self.ctx.send_message_chain(sid, chain)
         err = str(result.err or "") if not result.ok else ""
         if not result.ok and "超时" not in err:
             return f"发送失败：{err}"
@@ -579,7 +579,7 @@ class MidiPlaySenderPlugin(BasePlugin):
             return
         self._cleanup_cache()
 
-        result = await self.ctx.message_processor.send_message_chain(
+        result = await self.ctx.send_message_chain(
             sid, MessageChain([Record(record=out, name=Path(out).name)]))
         err = str(result.err or "") if not result.ok else ""
         if not result.ok and "超时" not in err:
